@@ -1,0 +1,23 @@
+model: google-t5/t5-small
+seed: 42
+
+dataset:
+  name: abisee/cnn_dailymail
+  data_dir: 3.0.0
+  train_samples: 10
+  test_samples: 1
+  output_dir: data
+
+training:
+  peft_method : lora # lora, alora, adalora, ia3 or none (for full FT)
+  trainer_params:
+    output_dir: results
+    eval_strategy: epoch
+    save_strategy: epoch
+    learning_rate: 2e-5
+    per_device_train_batch_size: 4
+    per_device_eval_batch_size: 4
+    num_train_epochs: 1
+    weight_decay: 0.01
+    load_best_model_at_end: false
+    report_to: tensorboard    
