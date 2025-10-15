@@ -9,7 +9,45 @@ dataset:
   output_dir: data
 
 training:
-  peft_method : lora # lora, alora, adalora, ia3 or none (for full FT)
+  peft_methods: 
+    - name: lora # lora, qlora, adalora, IA3 or none (for full FT)
+      params:
+        task_type: TaskType.SEQ_2_SEQ_LM
+        r: 8
+        lora_alpha: 32
+        lora_dropout: 0.1
+    - name: qlora
+      params:
+        task_type: TaskType.SEQ_2_SEQ_LM
+        r: 8
+        lora_alpha: 32
+        lora_dropout: 0.1
+      bnb_config: 
+        load_in_4bit: true
+        bnb_4bit_quant_type: nf4
+        bnb_4bit_compute_dtype: torch.bfloat16
+        bnb_4bit_use_double_quant: true
+    - name: adalora
+      params:
+        task_type: TaskType.SEQ_2_SEQ_LM
+        r: 8 # initial rank
+        lora_alpha: 32 # scaling factor
+        target_modules: ["q", "v"] # modules to apply AdaLoRA to (common for T5)
+        lora_dropout: 0.01 # dropout of LoRA layers
+        target_r: 8 # target rank
+        init_r: 12 # initial rank
+        deltaT: 10 # interval for rank update
+        beta1: 0.85 # momentum for rank update
+        beta2: 0.85 # momentum for rank update
+        orth_reg_weight: 0.5 # orthogonal regularization weight
+    - name: IA3
+      params:
+        task_type: TaskType.SEQ_2_SEQ_LM
+        target_modules: ["k", "v", "wi"]
+        lora_dropout: 0.0
+        bias: none
+        feeder_adapter_size: 1
+
   trainer_params:
     output_dir: results
     eval_strategy: epoch
